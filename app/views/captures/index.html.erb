@@ -16,8 +16,8 @@
     <% @captures.each do |capture| %>
       <tr>
         <td><%= capture.name %></td>
-        <td><%= capture.imgurl %></td>
-        <td><%= capture.url %></td>
+        <td><%= link_to capture.imgurl, capture.imgurl %></td>
+        <td><%= capture.url.id %></td>
         <td><%= link_to 'Show', capture %></td>
         <td><%= link_to 'Edit', edit_capture_path(capture) %></td>
         <td><%= link_to 'Destroy', capture, method: :delete, data: { confirm: 'Are you sure?' } %></td>
