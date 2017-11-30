@@ -1,0 +1,68 @@
+diff --git a/app/models/url.rb b/app/models/url.rb
+index 3065dca..bf06364 100644
+--- a/app/models/url.rb
++++ b/app/models/url.rb
+@@ -1,4 +1,17 @@
+ class Url < ApplicationRecord
+   belongs_to :user
+   has_many :captures
++
++  def capture
++    require "open-uri"
++    if (!self.url.nil? && self.url.length > 2) then
++      @imgurl = open("https://cutycapt.tobata.asia/link.php?url=http://"+self.url).read
++#      print @imgurl
++      
++      @c = Capture.create(name: self.url , imgurl: @imgurl, url: self)
++      self.captures << @c 
++      return @imgurl
++    end
++
++  end
+ end
+diff --git a/app/views/captures/index.html.erb b/app/views/captures/index.html.erb
+index b12ef5b..ecba442 100644
+--- a/app/views/captures/index.html.erb
++++ b/app/views/captures/index.html.erb
+@@ -16,8 +16,8 @@
+     <% @captures.each do |capture| %>
+       <tr>
+         <td><%= capture.name %></td>
+-        <td><%= capture.imgurl %></td>
+-        <td><%= capture.url %></td>
++        <td><%= link_to capture.imgurl, capture.imgurl %></td>
++        <td><%= capture.url.id %></td>
+         <td><%= link_to 'Show', capture %></td>
+         <td><%= link_to 'Edit', edit_capture_path(capture) %></td>
+         <td><%= link_to 'Destroy', capture, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+diff --git a/app/views/urls/show.html.erb b/app/views/urls/show.html.erb
+index 8d8eb84..0082d82 100644
+--- a/app/views/urls/show.html.erb
++++ b/app/views/urls/show.html.erb
+@@ -15,5 +15,9 @@
+   <%= @url.user %>
+ </p>
+ 
++<% @url.captures.each do |c| %>
++<%= image_tag c.imgurl , width: 300 %>
++<% end %>
++
+ <%= link_to 'Edit', edit_url_path(@url) %> |
+ <%= link_to 'Back', urls_path %>
+diff --git a/lib/tasks/capture_all.rake b/lib/tasks/capture_all.rake
+new file mode 100644
+index 0000000..8818329
+--- /dev/null
++++ b/lib/tasks/capture_all.rake
+@@ -0,0 +1,11 @@
++namespace :capture_all do
++  desc "Create new capture for each url"
++  task :get => :environment do
++    puts "Get"
++    @urls = Url.all
++    @urls.each do |url| 
++      puts url.url
++      puts url.capture
++    end
++  end
++end
